@@ -26,6 +26,7 @@ public class LocadoraBean implements Locadora {
 		// TODO Auto-generated method stub
 		try{
 			manager.persist(filme);
+			associarDiretorFilme(idDiretor, filme);
 			return true;
 		}catch(Exception e){
 			e.printStackTrace();
@@ -141,8 +142,7 @@ public class LocadoraBean implements Locadora {
         }
 	}
 	
-    public boolean associarDiretorFilme(int idDiretor, int idFilme) {
-    	Filme filme = buscarFilmePorId(idFilme);
+    public boolean associarDiretorFilme(int idDiretor, Filme filme) {
     	Diretor diretor = buscarDiretorPorID(idDiretor);
     	if (filme != null && diretor != null){
 	    	filme.getDiretores().add(diretor);
