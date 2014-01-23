@@ -12,10 +12,10 @@ import br.ssad.classes.Filme;
 @Remote
 public interface Locadora {
 	
-	void cadastrarFilme(Filme filme);
-	void cadastrarExemplar(Exemplar exemplar);
-	void cadastrarCliente(Cliente cliente);
-	void cadastrarDiretor(Diretor diretor);
+	boolean cadastrarFilme(Filme filme, int idDiretor);
+	boolean cadastrarExemplar(Exemplar exemplar, int idFilme);
+	boolean cadastrarCliente(Cliente cliente);
+	boolean cadastrarDiretor(Diretor diretor);
 	
 	Filme buscarFilmePorId(int idFilme);
 	Filme buscarFilmePorNome(String nome);

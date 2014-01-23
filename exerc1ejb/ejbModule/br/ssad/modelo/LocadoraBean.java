@@ -22,27 +22,52 @@ public class LocadoraBean implements Locadora {
 	private EntityManager manager;
 
 	@Override
-	public void cadastrarFilme(Filme filme) {
+	public boolean cadastrarFilme(Filme filme, int idDiretor) {
 		// TODO Auto-generated method stub
-		manager.persist(filme);
+		try{
+			manager.persist(filme);
+			return true;
+		}catch(Exception e){
+			e.printStackTrace();
+			return false;
+		}
 	}
 
 	@Override
-	public void cadastrarExemplar(Exemplar exemplar) {
+	public boolean cadastrarExemplar(Exemplar exemplar, int idFilme) {
 		// TODO Auto-generated method stub
-		manager.persist(exemplar);
+		try{
+			Filme filme = manager.find(Filme.class, idFilme);
+	        List<Exemplar> exemplares = filme.getExemplares();
+	        exemplar.setFilme(filme);
+	        manager.persist(exemplar);
+	        exemplares.add(exemplar);
+	        manager.merge(filme);
+	        manager.flush();
+	        return true;
+		}catch(Exception e){
+			e.printStackTrace();
+			return false;
+		}
 	}
 
 	@Override
-	public void cadastrarCliente(Cliente cliente) {
+	public boolean cadastrarCliente(Cliente cliente) {
 		// TODO Auto-generated method stub
 		manager.persist(cliente);
+		return true;
 	}
 
 	@Override
-	public void cadastrarDiretor(Diretor diretor) {
+	public boolean cadastrarDiretor(Diretor diretor) {
 		// TODO Auto-generated method stub
-		manager.persist(diretor);
+		try{
+			manager.persist(diretor);
+			return true;
+		}catch(Exception e){
+			e.printStackTrace();
+			return false;
+		}
 	}
 
 	@Override
