@@ -24,9 +24,9 @@ public class LocadoraApp {
 			filme.getDiretores().add(new Diretor());
 			diretor.setNome("ze2");
 			diretor.getFilmes().add(filme);
-			locadora.addDiretor(diretor);
+			locadora.cadastrarDiretor(diretor);
 			filme.getDiretores().add(diretor);
-			locadora.addFilme(filme);
+			locadora.cadastrarFilme(filme);
 		} catch (NamingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
