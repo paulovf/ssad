@@ -6,6 +6,7 @@ import javax.ejb.Remote;
 
 import br.ssad.classes.Cliente;
 import br.ssad.classes.Diretor;
+import br.ssad.classes.Emprestimo;
 import br.ssad.classes.Exemplar;
 import br.ssad.classes.Filme;
 
@@ -16,6 +17,7 @@ public interface Locadora {
 	boolean cadastrarExemplar(Exemplar exemplar, int idFilme);
 	boolean cadastrarCliente(Cliente cliente);
 	boolean cadastrarDiretor(Diretor diretor);
+	boolean cadastrarLocacao(Emprestimo emprestimo, int idCliente, int idFilme);
 	
 	Filme buscarFilmePorId(int idFilme);
 	Filme buscarFilmePorNome(String nome);

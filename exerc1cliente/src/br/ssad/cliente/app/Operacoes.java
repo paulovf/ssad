@@ -28,7 +28,8 @@ public class Operacoes {
 			boolean erro = false;
 			switch(this.operacao){
 			case 1:
-				
+				while(!erro)
+					erro = menu.criarCliente();
 				break;
 			case 2:
 				while(!erro)
@@ -43,7 +44,8 @@ public class Operacoes {
 					erro = menu.criarExemplar();
 				break;
 			case 5:
-				
+				while(!erro)
+					erro = menu.criarEmprestimo();
 				break;
 			case 6:
 				

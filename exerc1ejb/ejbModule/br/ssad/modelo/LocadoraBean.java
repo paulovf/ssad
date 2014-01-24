@@ -11,6 +11,7 @@ import javax.persistence.Query;
 
 import br.ssad.classes.Cliente;
 import br.ssad.classes.Diretor;
+import br.ssad.classes.Emprestimo;
 import br.ssad.classes.Exemplar;
 import br.ssad.classes.Filme;
 
@@ -55,8 +56,13 @@ public class LocadoraBean implements Locadora {
 	@Override
 	public boolean cadastrarCliente(Cliente cliente) {
 		// TODO Auto-generated method stub
-		manager.persist(cliente);
-		return true;
+		try{
+			manager.persist(cliente);
+			return true;
+		}catch(Exception e){
+			e.printStackTrace();
+			return false;
+		}
 	}
 
 	@Override
@@ -65,6 +71,25 @@ public class LocadoraBean implements Locadora {
 		try{
 			manager.persist(diretor);
 			return true;
+		}catch(Exception e){
+			e.printStackTrace();
+			return false;
+		}
+	}
+	
+	@Override
+	public boolean cadastrarLocacao(Emprestimo emprestimo, int idCliente, int idFilme) {
+		// TODO Auto-generated method stub
+		try{
+			Cliente cliente = manager.find(Cliente.class, idCliente);
+			Filme filme = manager.find(Filme.class, idFilme);
+	        List<Emprestimo> emprestimos = cliente.getEmprestimos();
+	        emprestimo.setCliente(cliente);
+	        manager.persist(emprestimo);
+	        emprestimos.add(emprestimo);
+	        manager.merge(cliente);
+	        manager.flush();
+	        return true;
 		}catch(Exception e){
 			e.printStackTrace();
 			return false;
