@@ -144,9 +144,10 @@ public class Menu {
 			int idFilme = Integer.parseInt(JOptionPane.showInputDialog("Forneça o id do filme:"));
 			emprestimo.setDataEmprestimo(JOptionPane.showInputDialog("Forneça a data do Empréstimo:"));
 			emprestimo.setEnderecoEntrega(JOptionPane.showInputDialog("Forneça o endereço de entrega:"));
+			String dataEntrega = JOptionPane.showInputDialog("Forneça a data de entrega:");
 			emprestimo.setValorTotal(Double.parseDouble(JOptionPane.showInputDialog("Forneça o valor total do Empréstimo:")));
 			try{
-				this.locadora.cadastrarLocacao(emprestimo, idCliente, idFilme);
+				this.locadora.cadastrarLocacao(emprestimo, idCliente, idFilme, dataEntrega);
 				JOptionPane.showMessageDialog(null, "Empréstimo cadastrado com sucesso!", "Locadora", JOptionPane.INFORMATION_MESSAGE);
 			}catch(Exception e){
 				e.printStackTrace();

@@ -14,6 +14,7 @@ import br.ssad.classes.Diretor;
 import br.ssad.classes.Emprestimo;
 import br.ssad.classes.Exemplar;
 import br.ssad.classes.Filme;
+import br.ssad.classes.ItemEmprestimo;
 
 @Stateful
 @Remote(Locadora.class)
@@ -78,18 +79,26 @@ public class LocadoraBean implements Locadora {
 	}
 	
 	@Override
-	public boolean cadastrarLocacao(Emprestimo emprestimo, int idCliente, int idFilme) {
+	public boolean cadastrarLocacao(Emprestimo emprestimo, int idCliente, int idFilme, String dataEntrega) {
 		// TODO Auto-generated method stub
 		try{
-			Cliente cliente = manager.find(Cliente.class, idCliente);
 			Filme filme = manager.find(Filme.class, idFilme);
-	        List<Emprestimo> emprestimos = cliente.getEmprestimos();
-	        emprestimo.setCliente(cliente);
-	        manager.persist(emprestimo);
-	        emprestimos.add(emprestimo);
-	        manager.merge(cliente);
-	        manager.flush();
-	        return true;
+            List<Exemplar> exemplares = filme.getExemplares();
+            ItemEmprestimo itemEmprestimo = new ItemEmprestimo();
+
+            Exemplar exemplar = null;
+            for (Exemplar e : exemplares) {
+                    if (e.getEmprestado().equalsIgnoreCase("n")) {
+                            exemplar = manager.find(Exemplar.class, e.getId());
+                            itemEmprestimo.setExemplar(exemplar);
+                            break;
+                    }
+            }
+            if (exemplar == null)
+                    return false;
+
+            //itemEmprestimo.setValorEmprestimo(valorEmprestimo);
+            return true;
 		}catch(Exception e){
 			e.printStackTrace();
 			return false;
@@ -117,7 +126,9 @@ public class LocadoraBean implements Locadora {
 	@Override
 	public List<Exemplar> buscarExemplaresFilme(int idFilme) {
 		// TODO Auto-generated method stub
-		return null;
+		Filme filme = manager.find(Filme.class, idFilme);
+		List<Exemplar> exemplares = filme.getExemplares();
+		return exemplares;
 	}
 
 	@Override

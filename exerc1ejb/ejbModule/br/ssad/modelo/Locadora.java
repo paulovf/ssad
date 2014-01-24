@@ -17,7 +17,7 @@ public interface Locadora {
 	boolean cadastrarExemplar(Exemplar exemplar, int idFilme);
 	boolean cadastrarCliente(Cliente cliente);
 	boolean cadastrarDiretor(Diretor diretor);
-	boolean cadastrarLocacao(Emprestimo emprestimo, int idCliente, int idFilme);
+	boolean cadastrarLocacao(Emprestimo emprestimo, int idCliente, int idFilme, String dataEntrega);
 	
 	Filme buscarFilmePorId(int idFilme);
 	Filme buscarFilmePorNome(String nome);

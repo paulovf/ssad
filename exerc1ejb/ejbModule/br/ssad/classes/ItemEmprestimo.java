@@ -14,7 +14,7 @@ public class ItemEmprestimo implements Serializable {
 	private static final long serialVersionUID = -5894737440775170378L;
 	private int id;
 	private double valorEmprestimo;
-	private double dataDevolucao;
+	private String dataDevolucao;
 	private Emprestimo emprestimo;
 	private Exemplar exemplar;
 	
@@ -36,11 +36,11 @@ public class ItemEmprestimo implements Serializable {
 		this.valorEmprestimo = valorEmprestimo;
 	}
 
-	public double getDataDevolucao() {
+	public String getDataDevolucao() {
 		return dataDevolucao;
 	}
 
-	public void setDataDevolucao(double dataDevolucao) {
+	public void setDataDevolucao(String dataDevolucao) {
 		this.dataDevolucao = dataDevolucao;
 	}
 
