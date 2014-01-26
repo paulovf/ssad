@@ -9,11 +9,15 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 
 @Entity
+@NamedQueries({
+    @NamedQuery(name = "buscarFilmesPorDiretor", query = "select f from Filme f join fetch f.diretores where f.nome like :nome"),
+    @NamedQuery(name = "buscarDiretoresPorFilme", query = "select d from Diretor d join fetch d.filmes where d.nome like :nome")})
 public class Filme implements Serializable {
-
 	private static final long serialVersionUID = 5207494699357115399L;
 	private int id;
 	private String nome;
@@ -96,7 +100,7 @@ public class Filme implements Serializable {
 	public String toString() {
 		return "Filme [id=" + id + ", nome=" + nome + ", genero=" + genero
 				+ ", anoLancamento=" + anoLancamento + ", duracao=" + duracao
-				+ ", valorLocacao=" + valorLocacao + ", diretores=" + diretores
-				+ ", exemplares=" + exemplares + "]";
+				+ ", valorLocacao=" + valorLocacao + ", diretores=" + diretores.toString();
+				//+ ", exemplares=" + exemplares.toString() + "]";
 	}
 }

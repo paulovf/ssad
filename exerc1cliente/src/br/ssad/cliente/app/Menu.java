@@ -2,21 +2,10 @@ package br.ssad.cliente.app;
 
 import javax.swing.JOptionPane;
 
-import br.ssad.classes.Cliente;
-import br.ssad.classes.Diretor;
-import br.ssad.classes.Emprestimo;
-import br.ssad.classes.Exemplar;
-import br.ssad.classes.Filme;
-import br.ssad.modelo.Locadora;
-
 public class Menu {
-	private Locadora locadora;
 
-	public Menu(Locadora locadora) {
-		this.locadora = locadora;
-	}
-
-	public int criaMenu(){
+	public void criaMenu(){
+		Operacoes operacoes = new Operacoes();
 		String op = "-1";
 		String texto = ">>>>> Locadora <<<<<\n\n" + 
 					"1 - Cadastrar Cliente:\n" +
@@ -30,133 +19,33 @@ public class Menu {
 					"\nEscolha sua opção"; 
 		while(!op.equalsIgnoreCase("0")){
 			op = JOptionPane.showInputDialog(texto);
+			boolean erro = false;
 			if(op.equals("1")){
-				return 1;
+				while(!erro)
+					erro = operacoes.criarCliente();
 			}else if(op.equals("2")){
-				return 2;
+				while(!erro)
+					erro = operacoes.criarDiretor();
 			}else if(op.equals("3")){
-				return 3;
+				while(!erro)
+					erro = operacoes.criarFilme();
 			}else if(op.equals("4")){
-				return 4;
+				while(!erro)
+					erro = operacoes.criarExemplar();
 			}else if(op.equals("5")){
-				return 5;
+				while(!erro)
+					erro = operacoes.criarEmprestimo();
 			}else if(op.equals("6")){
-				return 6;
+				while(!erro)
+					erro = operacoes.encerrarEmprestimo();
 			}else if(op.equals("7")){
-				return 7;
-			}else if(op.equals("8")){
-				return 8;
+				while(!erro)
+					erro = operacoes.excluirDiretor();
 			}else if(op.equals("0")){
 				System.exit(0);
 			}else{
 				JOptionPane.showMessageDialog(null, "Opção incorreta", "Locadora", JOptionPane.ERROR_MESSAGE);
 			}
-		}
-		return 0;
-	}
-	
-	public boolean criarCliente(){
-		try{
-			Cliente cliente = new Cliente();
-			cliente.setNome(JOptionPane.showInputDialog("Forneça o Nome do cliente:"));
-			cliente.setEndereco(JOptionPane.showInputDialog("Forneça o endereço do cliente:"));
-			cliente.setDataNascimento(JOptionPane.showInputDialog("Forneça a data de nascimento do cliente:"));
-			cliente.setEmail(JOptionPane.showInputDialog("Forneça o e-mail do cliente:"));
-			try{
-				this.locadora.cadastrarCliente(cliente);
-				JOptionPane.showMessageDialog(null, "Cliente cadastrado com sucesso!", "Locadora", JOptionPane.INFORMATION_MESSAGE);
-			}catch(Exception e){
-				e.printStackTrace();
-				JOptionPane.showMessageDialog(null, "Erro ao cadastrar diretor!", "cliente", JOptionPane.ERROR_MESSAGE);
-			}
-			return true;
-		}catch(Exception e){
-			JOptionPane.showMessageDialog(null, "Você forneceu algum valor incorreto!", "Locadora", JOptionPane.ERROR_MESSAGE);
-			return false;
-		}
-	}
-	
-	public boolean criarDiretor(){
-		try{
-			Diretor diretor = new Diretor();
-			diretor.setNome(JOptionPane.showInputDialog("Forneça o Nome do diretor:"));
-			try{
-				this.locadora.cadastrarDiretor(diretor);
-				JOptionPane.showMessageDialog(null, "Diretor cadastrado com sucesso!", "Locadora", JOptionPane.INFORMATION_MESSAGE);
-			}catch(Exception e){
-				e.printStackTrace();
-				JOptionPane.showMessageDialog(null, "Erro ao cadastrar diretor!", "Locadora", JOptionPane.ERROR_MESSAGE);
-			}
-			return true;
-		}catch(Exception e){
-			JOptionPane.showMessageDialog(null, "Você forneceu algum valor incorreto!", "Locadora", JOptionPane.ERROR_MESSAGE);
-			return false;
-		}
-	}
-	
-	public boolean criarFilme(){
-		try{
-			Filme filme = new Filme();
-			filme.setNome(JOptionPane.showInputDialog("Forneça o Nome do filme:"));
-			filme.setAnoLancamento(Integer.parseInt(JOptionPane.showInputDialog("Forneça o ano de lançamento:")));
-			filme.setDuracao(Double.parseDouble(JOptionPane.showInputDialog("Forneça a duração do filme:")));
-			filme.setGenero(JOptionPane.showInputDialog("Forneça o gênero do filme:"));
-			int id = Integer.parseInt(JOptionPane.showInputDialog("Forneça o id do diretor:"));
-			filme.setValorLocacao(Double.parseDouble(JOptionPane.showInputDialog("Forneça o valor de locação do filme:")));
-			try{
-				this.locadora.cadastrarFilme(filme, id);
-				JOptionPane.showMessageDialog(null, "Filme cadastrado com sucesso!", "Locadora", JOptionPane.INFORMATION_MESSAGE);
-			}catch(Exception e){
-				e.printStackTrace();
-				JOptionPane.showMessageDialog(null, "Erro ao cadastrar filme!", "Locadora", JOptionPane.ERROR_MESSAGE);
-			}
-			return true;
-		}catch(Exception e){
-			JOptionPane.showMessageDialog(null, "Você forneceu algum valor incorreto!", "Locadora", JOptionPane.ERROR_MESSAGE);
-			return false;
-		}
-	}
-	
-	public boolean criarExemplar(){
-		try{
-			Exemplar exemplar = new Exemplar();
-			int id = Integer.parseInt(JOptionPane.showInputDialog("Forneça o id do filme:"));
-			exemplar.setDataAquisicao(JOptionPane.showInputDialog("Forneça a data de aquisição do Exemplar:"));
-			exemplar.setEmprestado("n");
-			try{
-				this.locadora.cadastrarExemplar(exemplar, id);
-				JOptionPane.showMessageDialog(null, "Exemplar cadastrado com sucesso!", "Locadora", JOptionPane.INFORMATION_MESSAGE);
-			}catch(Exception e){
-				e.printStackTrace();
-				JOptionPane.showMessageDialog(null, "Erro ao cadastrar exemplar!", "Locadora", JOptionPane.ERROR_MESSAGE);
-			}
-			return true;
-		}catch(Exception e){
-			JOptionPane.showMessageDialog(null, "Você forneceu algum valor incorreto!", "Locadora", JOptionPane.ERROR_MESSAGE);
-			return false;
-		}
-	}
-	
-	public boolean criarEmprestimo(){
-		try{
-			Emprestimo emprestimo = new Emprestimo();
-			int idCliente = Integer.parseInt(JOptionPane.showInputDialog("Forneça o id do cliente:"));
-			int idFilme = Integer.parseInt(JOptionPane.showInputDialog("Forneça o id do filme:"));
-			emprestimo.setDataEmprestimo(JOptionPane.showInputDialog("Forneça a data do Empréstimo:"));
-			emprestimo.setEnderecoEntrega(JOptionPane.showInputDialog("Forneça o endereço de entrega:"));
-			String dataEntrega = JOptionPane.showInputDialog("Forneça a data de entrega:");
-			emprestimo.setValorTotal(Double.parseDouble(JOptionPane.showInputDialog("Forneça o valor total do Empréstimo:")));
-			try{
-				this.locadora.cadastrarLocacao(emprestimo, idCliente, idFilme, dataEntrega);
-				JOptionPane.showMessageDialog(null, "Empréstimo cadastrado com sucesso!", "Locadora", JOptionPane.INFORMATION_MESSAGE);
-			}catch(Exception e){
-				e.printStackTrace();
-				JOptionPane.showMessageDialog(null, "Erro ao cadastrar empréstimo!", "Locadora", JOptionPane.ERROR_MESSAGE);
-			}
-			return true;
-		}catch(Exception e){
-			JOptionPane.showMessageDialog(null, "Você forneceu algum valor incorreto!", "Locadora", JOptionPane.ERROR_MESSAGE);
-			return false;
 		}
 	}
 }

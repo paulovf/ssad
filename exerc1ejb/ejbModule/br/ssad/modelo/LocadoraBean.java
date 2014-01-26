@@ -24,12 +24,16 @@ public class LocadoraBean implements Locadora {
 	private EntityManager manager;
 
 	@Override
-	public boolean cadastrarFilme(Filme filme, int idDiretor) {
-		// TODO Auto-generated method stub
+	public boolean cadastrarFilme(Filme filme, String nomeDiretor) {
 		try{
+			String nomeFilme = filme.getNome();
 			manager.persist(filme);
-			associarDiretorFilme(idDiretor, filme);
-			return true;
+			manager.flush();
+			if(associarDiretorFilme(buscarDiretorPorNome(nomeDiretor).getId(), nomeFilme)){
+				return true;
+			}else{
+				return false;
+			}
 		}catch(Exception e){
 			e.printStackTrace();
 			return false;
@@ -37,14 +41,13 @@ public class LocadoraBean implements Locadora {
 	}
 
 	@Override
-	public boolean cadastrarExemplar(Exemplar exemplar, int idFilme) {
-		// TODO Auto-generated method stub
+	public boolean cadastrarExemplar(Exemplar exemplar, String nomeFilme) {
 		try{
-			Filme filme = manager.find(Filme.class, idFilme);
-	        List<Exemplar> exemplares = filme.getExemplares();
+			Filme filme = buscarFilmePorNome(nomeFilme);
 	        exemplar.setFilme(filme);
 	        manager.persist(exemplar);
-	        exemplares.add(exemplar);
+	        manager.flush();
+	        filme.getExemplares().add(exemplar);
 	        manager.merge(filme);
 	        manager.flush();
 	        return true;
@@ -56,7 +59,6 @@ public class LocadoraBean implements Locadora {
 
 	@Override
 	public boolean cadastrarCliente(Cliente cliente) {
-		// TODO Auto-generated method stub
 		try{
 			manager.persist(cliente);
 			return true;
@@ -68,7 +70,6 @@ public class LocadoraBean implements Locadora {
 
 	@Override
 	public boolean cadastrarDiretor(Diretor diretor) {
-		// TODO Auto-generated method stub
 		try{
 			manager.persist(diretor);
 			return true;
@@ -78,27 +79,43 @@ public class LocadoraBean implements Locadora {
 		}
 	}
 	
+	@SuppressWarnings({ "unchecked" })
 	@Override
-	public boolean cadastrarLocacao(Emprestimo emprestimo, int idCliente, int idFilme, String dataEntrega) {
-		// TODO Auto-generated method stub
+	public boolean cadastrarLocacao(Emprestimo emprestimo, String nomeCliente, String nomeFilme, String dataEntrega) {
 		try{
-			Filme filme = manager.find(Filme.class, idFilme);
-            List<Exemplar> exemplares = filme.getExemplares();
-            ItemEmprestimo itemEmprestimo = new ItemEmprestimo();
-
-            Exemplar exemplar = null;
-            for (Exemplar e : exemplares) {
-                    if (e.getEmprestado().equalsIgnoreCase("n")) {
-                            exemplar = manager.find(Exemplar.class, e.getId());
-                            itemEmprestimo.setExemplar(exemplar);
-                            break;
-                    }
-            }
-            if (exemplar == null)
-                    return false;
-
-            //itemEmprestimo.setValorEmprestimo(valorEmprestimo);
-            return true;
+	        Cliente cliente = buscarClientePorNome(nomeCliente);
+	        Filme filme = buscarFilmePorNome(nomeFilme);
+	        cliente.getEmprestimos().add(emprestimo);
+	        emprestimo.setCliente(cliente);
+	        manager.persist(emprestimo);
+	        manager.flush();
+	        manager.merge(cliente);
+			
+			Query q = manager.createQuery("select e from Exemplar e");	        
+	        List<Exemplar> exemplares = q.getResultList();
+			ItemEmprestimo itemEmprestimo = new ItemEmprestimo();
+			Exemplar exemplar = new Exemplar();
+			for (Exemplar e : exemplares) {
+				if(e.getFilme().getId() == filme.getId()){
+					if (e.getEmprestado().equalsIgnoreCase("n")) {
+						e.setEmprestado("s");
+						exemplar = e;
+						itemEmprestimo.setExemplar(e);
+						break;
+					}
+				}
+			}
+			if (itemEmprestimo.getExemplar() == null)
+				return false;
+			itemEmprestimo.setEmprestimo(emprestimo);
+			itemEmprestimo.setDataDevolucao(dataEntrega);
+			itemEmprestimo.setValorEmprestimo(emprestimo.getValorTotal());
+			manager.persist(itemEmprestimo);
+			manager.flush();
+			exemplar.getItemEmprestimos().add(itemEmprestimo);
+			manager.merge(exemplar);
+			manager.flush();
+			return true;
 		}catch(Exception e){
 			e.printStackTrace();
 			return false;
@@ -107,64 +124,177 @@ public class LocadoraBean implements Locadora {
 
 	@Override
 	public Filme buscarFilmePorId(int idFilme) {
-		// TODO Auto-generated method stub
-		return null;
+		try{
+			Query q = manager.createQuery("select f from Filme f join fetch f.diretores where f.id = :id");
+	        q.setParameter("id", idFilme);
+        	return (Filme)q.getSingleResult();
+        }catch(Exception e){
+        	e.printStackTrace();
+            return null;
+        }
 	}
 
 	@Override
 	public Filme buscarFilmePorNome(String nome) {
-		// TODO Auto-generated method stub
-		return null;
+		try{
+			Query q = manager.createQuery("select f from Filme f where f.nome like :nome");
+	        q.setParameter("nome", "%"+nome+"%");
+        	return (Filme)q.getSingleResult();
+        }catch(Exception e){
+        	e.printStackTrace();
+            return null;
+        }
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public List<Filme> buscarFilmesPorDiretor(int idDiretor) {
-		// TODO Auto-generated method stub
-		return null;
+	public List<Filme> buscarFilmesPorDiretor(String nome) {
+		try{       
+        	Query q = manager.createNamedQuery("buscarFilmesPorDiretor");
+            q.setParameter("nome", nome);
+            return q.getResultList();
+        }catch(Exception e){
+        	e.printStackTrace();
+            return null;
+        }
 	}
 
 	@Override
 	public List<Exemplar> buscarExemplaresFilme(int idFilme) {
-		// TODO Auto-generated method stub
 		Filme filme = manager.find(Filme.class, idFilme);
 		List<Exemplar> exemplares = filme.getExemplares();
 		return exemplares;
 	}
+	
+	public List<Emprestimo> buscarEmprestimosCliente(int idCliente) {
+		Cliente cliente = manager.find(Cliente.class, idCliente);
+		List<Emprestimo> emprestimos = cliente.getEmprestimos();
+		return emprestimos;
+	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public List<Diretor> buscarDiretoresPorFilme(int idDfilme) {
-		// TODO Auto-generated method stub
-		return null;
+	public List<Diretor> buscarDiretoresPorFilme(String nome) {
+		try{       
+        	Query q = manager.createNamedQuery("buscarDiretoresPorFilme");
+            q.setParameter("nome", nome);
+            return q.getResultList();
+        }catch(Exception e){
+        	e.printStackTrace();
+            return null;
+        }
+	}
+	
+	public Diretor buscarDiretorPorNome(String nomeDiretor) {
+		try{
+			Query q = manager.createQuery("select d from Diretor d where d.nome like :nome");
+	        q.setParameter("nome", "%"+nomeDiretor+"%");
+        	return (Diretor)q.getSingleResult();
+        }catch(Exception e){
+        	e.printStackTrace();
+            return null;
+        }
 	}
 
 	@Override
 	public List<Filme> buscarFilmesPorGeneroAno(String genero, int ano) {
-		// TODO Auto-generated method stub
-		return null;
+		 try{
+			Query q = manager.createQuery("select f from Filme f where f.anoLancamento = :ano and f.genero LIKE :genero");
+	        q.setParameter("ano", ano);
+	        q.setParameter("genero", "%"+genero+"%");   
+        	@SuppressWarnings("unchecked")
+			List<Filme> filmes = q.getResultList();
+        	return filmes;
+        }catch(Exception e){
+        	e.printStackTrace();
+            return null;
+        }
 	}
 
 	@Override
 	public Cliente buscarClientePorId(int idCliente) {
-		// TODO Auto-generated method stub
-		return null;
+		try{
+			Query q = manager.createQuery("select c from Cliente c join fetch c.emprestimos where c.id = :id");
+	        q.setParameter("id", idCliente);   
+        	Cliente cliente = (Cliente) q.getSingleResult();
+        	return cliente;
+        }catch(Exception e){
+        	e.printStackTrace();
+            return null;
+        }
 	}
 
 	@Override
 	public Cliente buscarClientePorNome(String nome) {
-		// TODO Auto-generated method stub
-		return null;
+		try{
+			Query q = manager.createQuery("select c from Cliente c where c.nome like :nome");
+	        q.setParameter("nome", "%"+nome+"%");  
+        	Cliente cliente =  (Cliente) q.getSingleResult();
+        	return cliente;
+        }catch(Exception e){
+        	e.printStackTrace();
+            return null;
+        }
 	}
 
 	@Override
-	public void excluirDiretor(int idDiretor) {
-		// TODO Auto-generated method stub
-		
+	public boolean excluirDiretor(String nomeDiretor) {
+		try{
+			Diretor diretor = buscarDiretorPorNome(nomeDiretor);
+			List<Filme> filmes = diretor.getFilmes();
+			for(Filme f: filmes){
+				f.getDiretores().remove(diretor);
+			}
+			diretor.getFilmes().clear();
+			manager.remove(diretor);
+	        return true;
+		}catch(Exception e){
+			e.printStackTrace();
+			return false;
+		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public void encerrarLocacao(int idEmprestimo) {
-		// TODO Auto-generated method stub
-		
+	public boolean encerrarLocacao(String nomeCliente, String nomeFilme, String dataEntrega) {
+		try{
+			Cliente cliente = buscarClientePorNome(nomeCliente);
+	        Filme filme = buscarFilmePorNome(nomeFilme);
+	        List<Exemplar> exemplares = buscarExemplaresFilme(filme.getId());
+	        List<Emprestimo> emprestimos = buscarEmprestimosCliente(cliente.getId());
+			
+	        Query q = manager.createQuery("select i from ItemEmprestimo i");
+	        List<ItemEmprestimo> itemEmprestimos = q.getResultList();
+	        Exemplar exemplar = null;
+	        boolean sair = false;
+	        for(Emprestimo e: emprestimos){
+				for (ItemEmprestimo i : itemEmprestimos) {
+					if(i.getEmprestimo().getId() == e.getId()){
+						for(Exemplar ex: exemplares){
+							if(ex.getId() == i.getExemplar().getId()){
+								exemplar = ex;
+								sair = true;
+								break;
+							}
+						}
+						if(sair)
+							break;
+					}
+				}
+				if(sair)
+					break;
+	        }
+			if(exemplar == null)
+				return false;
+	        
+			exemplar.setEmprestado("n");
+			manager.merge(exemplar);
+			manager.flush();
+			return true;
+		}catch(Exception e){
+			e.printStackTrace();
+			return false;
+		}
 	}
 	
 	public Diretor buscarDiretorPorID(int idDiretor){
@@ -178,14 +308,25 @@ public class LocadoraBean implements Locadora {
         }
 	}
 	
-    public boolean associarDiretorFilme(int idDiretor, Filme filme) {
-    	Diretor diretor = buscarDiretorPorID(idDiretor);
-    	if (filme != null && diretor != null){
-	    	filme.getDiretores().add(diretor);
-	    	this.manager.merge(filme);
-	    	this.manager.flush();
-	    	return true;
+	public boolean associarDiretorFilme(int idDiretor, String nomeFilme) {
+    	try{
+	    	Diretor diretor = buscarDiretorPorID(idDiretor);
+	    	System.out.println(diretor.getNome() + "<<<1<<<<");
+	    	Query q = manager.createQuery("select f from Filme f where f.nome like :nome");
+	    	q.setParameter("nome", nomeFilme);
+	    	Filme filme = (Filme)q.getSingleResult();
+
+	    	if (diretor != null && filme != null){
+		    	filme.getDiretores().add(diretor);
+		    	this.manager.merge(filme);
+		    	this.manager.flush();
+		    	return true;
+	    	}else{
+	    		return false;
+	    	}
+    	}catch(Exception e){
+    		e.printStackTrace();
+    		return false;
     	}
-    	return false;
     }
 }
